@@ -1,3 +1,4 @@
+from ung_shared.system_adapter import register_frame, convert_position, link_timing
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -137,3 +138,13 @@ async def simulator():
 APP.mount("/static",StaticFiles(directory="app/static"),name="static")
 @APP.get("/",response_class=HTMLResponse)
 async def home(): return Path("app/static/index.html").read_text()
+
+@app.post("/v1/frames/register")
+def ung_frame_register(body: dict):
+    return register_frame(body["source"],body["destination"],body["matrix"],body.get("timestamp"),body.get("version","ung-frame-v1"))
+@app.post("/v1/frames/convert")
+def ung_frame_convert(body: dict):
+    return convert_position(body["position"],body["source"],body["destination"])
+@app.post("/v1/propagation/link")
+def ung_propagation_link(body: dict):
+    return link_timing(body["origin_m"],body["destination_m"],float(body.get("speed_mps",299792458.0)))
